@@ -1,0 +1,11 @@
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761634.1.fa.gz  2023-10-16 18:08        17M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761635.1.fa.gz  2023-10-16 18:09        22M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761636.1.fa.gz  2023-10-16 18:08        18M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761637.1.fa.gz  2023-10-16 18:08        16M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761638.1.fa.gz  2023-10-16 18:08        22M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761639.1.fa.gz  2023-10-16 18:08        18M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761640.1.fa.gz  2023-10-16 18:09        19M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761641.1.fa.gz  2023-10-16 18:09        18M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761642.1.fa.gz  2023-10-16 18:09        11M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.LR761643.1.fa.gz  2023-10-16 18:08        17M
+[   ]   Crassostrea_gigas.cgigas_uk_roslin_v1.dna_sm.primary_assembly.MZ497416.1.fa.gz  2023-10-16 18:09        5.9K

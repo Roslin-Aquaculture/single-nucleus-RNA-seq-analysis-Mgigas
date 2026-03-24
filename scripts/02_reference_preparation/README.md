@@ -23,8 +23,11 @@ In our workflow, the oyster genome and annotation were combined with an OsHV-1 g
 
 #### Directory contents
 
-- `oyster_genome_files.txt`  
+- `oyster_genome_files.txt`
   This file has fasta filenames for all the individual chromosomes for Pacific oyster. Make a copy of this .txt file in your current working directory to download oyster genome.
+- `viv46-2-m_assembly_NR_2017.fasta` Genome file for OsHV-1
+- `viv46-2-m_assembly_NR_final_ok.gff` GFF annotation file for OsHV-1
+- 
 ---
 
 #### Recommended workflow

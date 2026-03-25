@@ -1,5 +1,5 @@
 
-setwd("/path/to/starsolo_outputs/")
+setwd("/path/to/dir/that/contains/star_outputs_Uni_Mult_EM_collated/")
 
 #load Libraries
 library(dplyr)

@@ -113,7 +113,7 @@ star_outputs_Uni_Mult_EM_collated/
 
 ##### 2. Merge barcodes and create seurat objects
 
-This is the key step in this part of the pipeline.
+This is the key step in this part of the pipeline.  
 
 Before creating Seurat objects, merge oligo-dT and random-hexamer capture barcodes so that reads from the same nucleus are assigned together rather than being treated as separate nuclei.
 
@@ -124,8 +124,18 @@ The barcode merge step used the helper files in:
 merge_parse_hexamers_polyA_captures/
 ```
 
-These include the barcode-definition CSV files and the barcode-merging R script required for Parse barcode reconciliation.
-To merge the barcodes and create one seurat object for each sub-library, download the helper files `merge_parse_hexamers_polyA_captures/` and run the R script `02_merge_parse_hexamer_polya_barcodes.R`.  
+These include the barcode-definition CSV files and the barcode-merging R script required for Parse barcode reconciliation.  
+
+Make sure you have this directory structure before you merge barcodes.  
+
+```text
+├── 02_merge_parse_hexamer_polya_barcodes.R
+├── star_outputs_Uni_Mult_EM_collated/
+└── merge_parse_hexamers_polyA_captures/
+```
+
+To merge the barcodes and create one seurat object for each sub-library, download the helper files `merge_parse_hexamers_polyA_captures/` and run the R script `02_merge_parse_hexamer_polya_barcodes.R`.
+
 An example run is shown below.  
 
 ```

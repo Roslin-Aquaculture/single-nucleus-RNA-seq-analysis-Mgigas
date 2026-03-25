@@ -17,7 +17,7 @@ The main output from this step is the integrated Seurat object used for downstre
 
 #### Main script
 
-Suggested file for this directory:
+Files in this directory:
 
 - `01_process_seurat_objects.R`  
   Loads the eight per-sublibrary Seurat objects, merges them, adds metadata, performs filtering and dimensionality reduction, and saves the final processed object.

@@ -69,7 +69,7 @@ The final processed object is saved as an `.rds` file for downstream annotation,
 Typical inputs for this step are:
 
 - `seu_1.rds` to `seu_8.rds`
-- `ribo_rRNA_genes`
+- `02_ribo_rRNA_genes`
 
 #### Output files
 

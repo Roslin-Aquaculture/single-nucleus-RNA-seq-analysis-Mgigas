@@ -21,6 +21,7 @@ Files in this directory:
 
 - `01_process_seurat_objects.R`  
   Loads the eight per-sublibrary Seurat objects, merges them, adds metadata, performs filtering and dimensionality reduction, and saves the final processed object.
+- `02_ribo_rRNA_genes` list of rRNA genes in M gigas
 
 ---
 

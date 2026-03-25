@@ -131,10 +131,10 @@ dim(seu_obj_filt)
 # ---------------------------
 
 # Ribosomal genes were extracted from the oyster GFF using:
-# grep 'ribosomal RNA;' Crassostrea_gigas.cgigas_uk_roslin_v1.58.chr.gff3 | awk '{print $9}' | awk -F";|:" '{print $2}' | grep -v "MZ*" > ribo_rRNA_genes
-# grep '=28S' Crassostrea_gigas.cgigas_uk_roslin_v1.58.chr.gff3 | awk '{print $9}' | awk -F";|:" '{print $2}' | grep -v "MZ*" >> ribo_rRNA_genes
+# grep 'ribosomal RNA;' Crassostrea_gigas.cgigas_uk_roslin_v1.58.chr.gff3 | awk '{print $9}' | awk -F";|:" '{print $2}' | grep -v "MZ*" > 02_ribo_rRNA_genes
+# grep '=28S' Crassostrea_gigas.cgigas_uk_roslin_v1.58.chr.gff3 | awk '{print $9}' | awk -F";|:" '{print $2}' | grep -v "MZ*" >> 02_ribo_rRNA_genes
 
-ribo_genes <- read_table("ribo_rRNA_genes", col_names = FALSE)
+ribo_genes <- read_table("02_ribo_rRNA_genes", col_names = FALSE)
 ribo_genes_to_remove <- as.character(ribo_genes$X1)
 
 # Optional additional highly abundant gene removed from the matrix

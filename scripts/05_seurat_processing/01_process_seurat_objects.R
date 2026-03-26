@@ -196,20 +196,5 @@ seu_obj_filt <- FindNeighbors(seu_obj_filt, dims = 1:18, reduction = "harmony")
 seu_obj_filt <- FindClusters(seu_obj_filt, resolution = 0.6)
 seu_obj_filt <- RunUMAP(seu_obj_filt, dims = 1:18, reduction = "harmony")
 
-# Plot UMAP
-DimPlot(
-  seu_obj_filt,
-  reduction = "umap",
-  label = TRUE,
-  pt.size = 0.5,
-  repel = TRUE,
-  label.box = TRUE,
-  sizes.highlight = TRUE,
-  label.size = 6
-) +
-  NoLegend() +
-  ggtitle("Starsolo harmony umap: 18 dim x 6 res x 3k variable features") +
-  theme(plot.title = element_text(hjust = 0.5))
-
-# Save final processed Seurat object
+# Save final processed Seurat object, this will be used for downstream analysis and manuscript figures
 saveRDS(seu_obj_filt, file = "seu_obj_filt_umap_18d_6r_3kRes_2026.rds")

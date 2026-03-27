@@ -72,7 +72,7 @@ head(seu_obj_clean)
 
 # Replace gene IDs with combined gene symbol / description labels to improve readability in downstream plots
 
-# Load annotation tables
+# Load annotation tables, these can be found in 06_figures/supporting_files
 ORSON <- read_csv("ORSON_french_group_2024_biorxiv_suppl2.csv") %>%
   select(Gene.ID, Description = Sequence.Description)
 

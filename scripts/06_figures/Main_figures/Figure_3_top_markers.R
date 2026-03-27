@@ -73,10 +73,10 @@ head(seu_obj_clean)
 # Replace gene IDs with combined gene symbol / description labels to improve readability in downstream plots
 
 # Load annotation tables, these can be found in 06_figures/supporting_files
-ORSON <- read_csv("ORSON_french_group_2024_biorxiv_suppl2.csv") %>%
+ORSON <- read_csv("01_ORSON_french_group_2024_biorxiv_suppl2.csv") %>%
   select(Gene.ID, Description = Sequence.Description)
 
-cg_science <- read_tsv("Cg_gene_names.tsv", col_names = FALSE) %>%
+cg_science <- read_tsv("02_Cg_gene_names.tsv", col_names = FALSE) %>%
   rename(Gene.ID = X1, Gene.symbol.science = X2)
 
 # Merge annotations and build combined display labels

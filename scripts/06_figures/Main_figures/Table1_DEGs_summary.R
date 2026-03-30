@@ -15,7 +15,7 @@ library(readr)
 # ------------------------------------------------------------------
 # Set working directory to the parent folder containing the DGE outputs
 # ------------------------------------------------------------------
-setwd("/home/pdewari/Documents/parse_2025/seurat_2025/de_plots_full_ann_30032026")
+setwd("de_plots_full_ann_30032026") # this was created in 06_figures/Main_figures/Figure_6_UpSet_plots.R as parent_dir <- "de_plots_full_ann_30032026"
 
 # ------------------------------------------------------------------
 # Define infection stages included in the DGE analysis

@@ -29,10 +29,11 @@ library(readr)
 ############################
 
 # Set working directory
-setwd("/home/pdewari/Documents/parse_2025/seurat_2025/")
+setwd("/path/to/processed/seurat/object")
 
-# Load Seurat object with PCA, Harmony, and UMAP already computed
-seu_obj <- read_rds("seu_obj_umap_18d_6r_3kRes.rds")
+# Load processed Seurat object; this was created previously under scripts/05_seurat_processing/01_process_seurat_objects.R
+seu_obj <- read_rds("seu_obj_filt_umap_18d_6r_3kRes_2026.rds") 
+
 seu_obj
 
 # Rename clusters using analysis-friendly labels with underscores

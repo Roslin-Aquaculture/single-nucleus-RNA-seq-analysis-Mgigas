@@ -7,6 +7,8 @@
 library(Seurat)
 library(tidyverse)
 library(plotly)
+library(shiny)
+
 
 ############################
 # Load processed Seurat object
@@ -140,7 +142,7 @@ p <- DotPlot(
   theme_minimal(base_size = 14) +
   theme(
     text = element_text(family = "Arial"),
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
     axis.text.y = element_text(size = 8, face = "bold"),
     axis.title = element_blank(),
     legend.position = "right",
@@ -167,3 +169,80 @@ ggsave(
 ############################
 
 ggplotly(p)
+
+
+############################
+# Generate interactive shiny version and search for an ORF
+############################
+ui <- fluidPage(
+  titlePanel("Search viral ORF expression"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      textInput("orf", "Enter ORF name", value = "ORF100"),
+      helpText("Example: ORF100, ORF112, ORF113"),
+      width = 3
+    ),
+    
+    mainPanel(
+      plotlyOutput("orf_plot", height = "900px"),
+      br(),
+      verbatimTextOutput("msg")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  selected_gene <- reactive({
+    toupper(trimws(input$orf))
+  })
+  
+  output$msg <- renderText({
+    g <- selected_gene()
+    
+    if (!(g %in% gene_names)) {
+      paste0(
+        g, " not found. Check the ORF name in gene_names."
+      )
+    } else {
+      paste0("Showing expression for ", g)
+    }
+  })
+  
+  output$orf_plot <- renderPlotly({
+    g <- selected_gene()
+    req(g %in% gene_names)
+    
+    p_gene <- DotPlot(
+      seu_obj_clean,
+      features = g,
+      group.by = "condition_cluster",
+      dot.scale = 8
+    ) +
+      scale_x_discrete(labels = g) +
+      scale_y_discrete(labels = clean_condition_cluster_labels) +
+      scale_color_gradientn(
+        colors = c("#4575b4", "#91bfdb", "#e0f3f8", "#fee090", "#fc8d59", "#d73027")
+      ) +
+      theme_minimal(base_size = 14) +
+      theme(
+        text = element_text(family = "Arial"),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(size = 8, face = "bold"),
+        axis.title = element_blank(),
+        legend.position = "right",
+        panel.grid.minor = element_blank(),
+        plot.margin = margin(t = 10, r = 10, b = 10, l = 80)
+      ) +
+      coord_flip(clip = "off")
+    
+    ggplotly(p_gene)
+  })
+}
+
+shinyApp(ui = ui, server = server)
+
+############################
+# Figure S5 ENDS 
+############################

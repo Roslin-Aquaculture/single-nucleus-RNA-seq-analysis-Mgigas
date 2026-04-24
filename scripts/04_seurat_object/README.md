@@ -113,7 +113,7 @@ star_outputs_Uni_Mult_EM_collated/
 
 ##### 2. Merge barcodes and create seurat objects
 
-This is the key step in this part of the pipeline.  
+This is the key step in this part of the pipeline and was developed by [Dr Richard Taylor](https://www.macqueenresearchgroup.com/dr-richard-taylor).  
 
 Before creating Seurat objects, merge oligo-dT and random-hexamer capture barcodes so that reads from the same nucleus are assigned together rather than being treated as separate nuclei.
 

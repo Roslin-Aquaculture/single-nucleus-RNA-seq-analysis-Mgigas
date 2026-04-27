@@ -144,16 +144,19 @@ total_cells <- tibble(
   total_cells = as.integer(table(seu_obj_clean$sample_subtypes))
 )
 
-# Count viral-positive cells and calculate proportions
 df_summary <- df %>%
   count(sample_subtype, name = "cells_with_viral") %>%
   left_join(total_cells, by = "sample_subtype") %>%
   mutate(
     percent_viral = round((cells_with_viral / total_cells) * 100, 1),
-    viral_cells = paste0(cells_with_viral, " (", percent_viral, "%)")
+    viral_positive_nuclei = paste0(cells_with_viral, " (", percent_viral, "%)")
   ) %>%
   arrange(desc(percent_viral)) %>%
-  select(sample_subtype, total_cells, viral_cells)
+  select(
+    sample_subtype,
+    total_nuclei = total_cells,
+    `viral_positive_nuclei (n,%)` = viral_positive_nuclei
+  )
 
 # View summary table
 df_summary

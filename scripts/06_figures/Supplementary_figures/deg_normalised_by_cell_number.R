@@ -254,5 +254,12 @@ deg_per_cell <- cell_counts_wide %>%
 
 deg_per_cell
 
-
+# Write DEG density summary as tab-separated file
+write.table(
+  deg_per_cell,
+  "deg_per_cell.tsv",
+  sep = "\t",
+  row.names = FALSE,
+  quote = FALSE
+)
 ################### PART 3 END ###################

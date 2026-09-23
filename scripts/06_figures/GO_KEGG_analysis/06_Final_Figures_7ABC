@@ -1,0 +1,239 @@
+# =========================================================
+# 07_figure7_final.R — Figure 7A-C and supplementary tables
+# Environment: go-enrich. Recomputes nothing; reads GSEA_tidy.tsv.
+# =========================================================
+library(readr); library(dplyr); library(tidyr); library(ggplot2)
+
+## ---- paths ----
+ENR     <- "/home/pdewari/eggnog/results/enrichment"
+GSEA_IN <- file.path(ENR, "gsea_across_stages", "GSEA_tidy.tsv")
+EMAP    <- "/home/pdewari/eggnog/results/full_proteome_20260820_124651/full_proteome.emapper.annotations"
+FIG_DIR <- file.path(ENR, "figures", "figure7_final")
+
+## ---- parameters (the only things to change) ----
+PADJ         <- 0.05
+OVERLAP_CUT  <- 0.8      # overlap coefficient: intersection / smaller set
+MIN_CLUSTERS <- 2
+STAGES       <- c("6hpi", "24hpi", "72hpi", "96hpi")
+
+dir.create(FIG_DIR, recursive = TRUE, showWarnings = FALSE)
+
+# =========================================================
+# PROVENANCE
+# =========================================================
+prov <- data.frame(
+  input        = GSEA_IN,
+  input_mtime  = format(file.mtime(GSEA_IN)),
+  input_md5    = unname(tools::md5sum(GSEA_IN)),
+  annotation   = EMAP,
+  built        = format(Sys.time()),
+  padj = PADJ, overlap_cut = OVERLAP_CUT, min_clusters = MIN_CLUSTERS)
+write_tsv(prov, file.path(FIG_DIR, "figure7_provenance.tsv"))
+print(t(prov))
+
+# =========================================================
+# GENE NAMES
+# =========================================================
+hdr  <- readLines(EMAP, n = 200)
+skip <- grep("^#query", hdr)[1] - 1
+egg  <- read_tsv(EMAP, skip = skip, comment = "##", show_col_types = FALSE) %>%
+  rename(query = 1) %>%
+  mutate(gene_id = sub("\\.\\d+$", "", sub("^transcript:", "", query)))
+
+name_of <- function(ids) {
+  i  <- match(ids, egg$gene_id)
+  nm <- egg$Preferred_name[i]; pf <- egg$PFAMs[i]
+  bad <- function(x) is.na(x) | x == "-" | x == ""
+  nm[bad(nm)] <- pf[bad(nm)]
+  nm[bad(nm)] <- ids[bad(nm)]
+  paste(unique(nm), collapse = ", ")
+}
+
+# =========================================================
+# LOAD + CURATE
+# =========================================================
+gsea <- read_tsv(GSEA_IN, show_col_types = FALSE)
+stopifnot(all(unique(gsea$stage) %in% STAGES))
+
+# Drop a term if its leading-edge genes are largely contained within those of
+# a more significant term. Overlap coefficient, not Jaccard, so that a child
+# term nested inside a parent is caught regardless of the size difference.
+collapse_redundant <- function(df, cut) {
+  if (nrow(df) == 0) return(df)
+  df   <- df[order(df$p.adjust), ]
+  sets <- strsplit(df$core_enrichment, "/")
+  keep <- logical(nrow(df))
+  for (i in seq_len(nrow(df))) {
+    if (!any(keep)) { keep[i] <- TRUE; next }
+    ov <- vapply(which(keep), function(k)
+      length(intersect(sets[[i]], sets[[k]])) / min(length(sets[[i]]), length(sets[[k]])),
+      numeric(1))
+    if (max(ov) < cut) keep[i] <- TRUE
+  }
+  df[keep, ]
+}
+
+curate <- function(onto, dir_keep) {
+  
+  sig <- gsea %>% filter(ontology == onto, direction == dir_keep, p.adjust < PADJ)
+  if (!nrow(sig)) return(list(display = sig, all = sig))
+  
+  # represent each term by the UNION of its leading-edge genes across all
+  # comparisons, so terms driven by the same genes anywhere are collapsed
+  rep_terms <- sig %>%
+    group_by(ID) %>%
+    summarise(p.adjust = min(p.adjust),
+              core_enrichment = paste(unique(unlist(strsplit(core_enrichment, "/"))),
+                                      collapse = "/"),
+              .groups = "drop")
+  kept <- collapse_redundant(as.data.frame(rep_terms), OVERLAP_CUT)$ID
+  
+  # every significant term is retained here, flagged; the supplementary file
+  # must contain the terms the collapse removed, or the threshold is not
+  # reversible by a reader
+  all_terms <- sig %>%
+    group_by(ID) %>% mutate(N_clusters = n_distinct(cluster)) %>% ungroup() %>%
+    mutate(Kept_after_collapse = ID %in% kept,
+           Displayed           = Kept_after_collapse & N_clusters >= MIN_CLUSTERS)
+  
+  cat(sprintf("\n%-6s %-14s  %3d rows | %3d terms | %3d collapsed | %3d shown (>=%d clusters)\n",
+              onto, dir_keep, nrow(sig), n_distinct(sig$ID),
+              length(kept), n_distinct(all_terms$ID[all_terms$Displayed]),
+              MIN_CLUSTERS))
+  
+  list(display = filter(all_terms, Displayed), all = all_terms)
+}
+
+panels <- list(
+  A = list(onto = "GO_BP", dir = "up_in_control",
+           title = "GO biological process - lower in infected nuclei"),
+  B = list(onto = "KEGG",  dir = "up_in_control",
+           title = "KEGG - lower in infected nuclei"),
+  C = list(onto = "GO_BP", dir = "up_in_target",
+           title = "GO biological process - higher in infected nuclei")
+)
+
+# =========================================================
+# PLOT
+# =========================================================
+make_plot <- function(d, title, dir_keep) {
+  
+  # early-phase terms at the top, late-phase at the bottom, breadth within
+  ord <- d %>% group_by(Description) %>%
+    summarise(stage_rank = mean(match(stage, STAGES)),
+              nc = first(N_clusters), p = min(p.adjust), .groups = "drop") %>%
+    arrange(desc(stage_rank), nc, desc(p)) %>% pull(Description)
+  
+  d <- d %>% mutate(
+    stage       = factor(stage, levels = STAGES),
+    cluster     = factor(gsub("_", " ", cluster)),
+    Description = factor(Description, levels = ord))
+  
+  # each panel is single-direction by construction, so a sequential scale is
+  # correct; a diverging one would advertise a range that cannot occur
+  sc <- if (dir_keep == "up_in_control") {
+    scale_colour_gradient(low = "#08306B", high = "#C6DBEF",
+                          name = "NES\n(lower in\ninfected)")
+  } else {
+    scale_colour_gradient(low = "#FCBBA1", high = "#A50F15",
+                          name = "NES\n(higher in\ninfected)")
+  }
+  
+  ggplot(d, aes(cluster, Description, colour = NES, size = -log10(p.adjust))) +
+    geom_point() +
+    facet_wrap(~ stage, nrow = 1, drop = FALSE) +
+    scale_x_discrete(drop = FALSE) +
+    sc +
+    scale_size_continuous(range = c(1.5, 5), name = "-log10 FDR") +
+    labs(title = title, x = NULL, y = NULL) +
+    theme_bw(base_size = 9) +
+    theme(axis.text.x      = element_text(angle = 45, hjust = 1),
+          strip.background = element_rect(fill = "grey95", colour = NA),
+          panel.spacing.x  = unit(0.6, "lines"),
+          panel.grid.minor = element_blank(),
+          legend.position  = "right")
+}
+
+as_table <- function(d, p) {
+  d %>% arrange(desc(N_clusters), p.adjust, cluster, stage) %>%
+    rowwise() %>%
+    mutate(Genes = name_of(strsplit(core_enrichment, "/")[[1]])) %>%
+    ungroup() %>%
+    transmute(Panel = p, Cluster = gsub("_", " ", cluster), Stage = stage,
+              Ontology = ontology, Term_ID = ID, Term = Description,
+              N_clusters, Kept_after_collapse, Displayed,
+              Set_size = setSize, NES = round(NES, 3),
+              FDR = signif(p.adjust, 3),
+              Leading_edge_genes = Genes, Leading_edge_ids = core_enrichment)
+}
+
+supp_all <- list()
+
+for (p in names(panels)) {
+  
+  cfg <- panels[[p]]
+  cur <- curate(cfg$onto, cfg$dir)
+  supp_all[[p]] <- as_table(cur$all, p)
+  
+  d <- cur$display
+  if (!nrow(d)) { cat("panel", p, "empty\n"); next }
+  
+  write_tsv(as_table(d, p), file.path(FIG_DIR, sprintf("Figure7%s_plotted_terms.tsv", p)))
+  
+  n_cl <- n_distinct(d$cluster); n_tm <- n_distinct(d$ID)
+  
+  ggsave(file.path(FIG_DIR, sprintf("Figure7%s.pdf", p)),
+         make_plot(d, cfg$title, cfg$dir),
+         width  = 3.0 + 4 * (0.30 * n_cl),
+         height = max(4.0, 1.8 + 0.22 * n_tm),
+         limitsize = FALSE)
+  
+  cat(sprintf("  -> Figure7%s.pdf : %d terms x %d clusters\n", p, n_tm, n_cl))
+}
+
+write_tsv(bind_rows(supp_all),
+          file.path(FIG_DIR, "AdditionalFile_Figure7_all_terms.tsv"))
+
+# =========================================================
+# VERIFY — every plotted row must trace to an unmodified source row
+# =========================================================
+chk <- lapply(names(panels), function(p) {
+  f <- file.path(FIG_DIR, sprintf("Figure7%s_plotted_terms.tsv", p))
+  if (!file.exists(f)) return(NULL)
+  read_tsv(f, show_col_types = FALSE) %>%
+    mutate(cl = gsub(" ", "_", Cluster)) %>%
+    left_join(gsea %>% select(cluster, stage, ID, NES_s = NES, p_s = p.adjust),
+              by = c("cl" = "cluster", "Stage" = "stage", "Term_ID" = "ID")) %>%
+    summarise(panel = p, rows = n(),
+              NES_mismatch = sum(abs(NES - round(NES_s, 3)) > 1e-6, na.rm = TRUE),
+              FDR_mismatch = sum(abs(FDR - signif(p_s, 3)) > 1e-12, na.rm = TRUE),
+              unmatched    = sum(is.na(NES_s)))
+}) %>% bind_rows()
+
+cat("\n--- verification (last three columns must be 0) ---\n")
+print(as.data.frame(chk))
+
+writeLines(capture.output(sessionInfo()), file.path(FIG_DIR, "sessionInfo.txt"))
+cat("\nOutputs:", FIG_DIR, "\n")
+
+
+# =========================================================
+# PANEL SUMMARY
+# =========================================================
+for (p in c("A", "B", "C")) {
+  f <- file.path(FIG_DIR, sprintf("Figure7%s_plotted_terms.tsv", p))
+  if (!file.exists(f)) next
+  tt <- read_tsv(f, show_col_types = FALSE)
+  cat("\n================ PANEL", p, "================\n")
+  print(as.data.frame(
+    tt %>% group_by(Term_ID, Term) %>%
+      summarise(n_cl     = first(N_clusters),
+                stages   = paste(sort(unique(Stage)), collapse = ","),
+                clusters = paste(sort(unique(Cluster)), collapse = "; "),
+                NES      = sprintf("%.2f to %.2f", min(NES), max(NES)),
+                FDR      = signif(min(FDR), 2),
+                genes    = substr(paste(unique(unlist(strsplit(Leading_edge_genes, ", "))),
+                                        collapse = ", "), 1, 110),
+                .groups  = "drop") %>%
+      arrange(desc(n_cl), FDR)), right = FALSE)
+}

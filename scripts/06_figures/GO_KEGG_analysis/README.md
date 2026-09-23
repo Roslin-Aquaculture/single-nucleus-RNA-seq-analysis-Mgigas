@@ -8,6 +8,13 @@ The pipeline covers two independent questions:
 - **What defines Cluster 1?** An unassigned cluster characterised using marker genes computed on uninfected animals only.
 
 ---
+```
+00a → 00b → 01 ─┬→ 02 ─┬→ 03b → 07        (Figure 7)
+                │      └→ 03a              (optional, supplementary)
+                ├→ 03d → 03c               (diagnostics)
+                └→ 05a → 05b → 06          (Cluster 1)
+```
+---
 
 ## Requirements
 

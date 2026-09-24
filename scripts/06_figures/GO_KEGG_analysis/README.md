@@ -10,7 +10,7 @@ The pipeline covers two independent questions:
 ---
 ```
 00a → 00b → 01 ─┬→ 02 ─┬→ 03b → 06_Final_Figures_7ABC        (Figure 7)
-                │      └→ 03a                                (optional, supplementary)
+                │      └→ 03a → 07_ORA_plots.R               (ORA, supplementary)
                 ├→ 03d → 03c                                 (diagnostics)
                 └→ 05a → 05b → 06_cluster1_figure_table      (Cluster 1)
 ```

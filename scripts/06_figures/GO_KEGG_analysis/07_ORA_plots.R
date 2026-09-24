@@ -1,5 +1,5 @@
 # =========================================================
-# 08_ora_panels.R — ORA dot-plot panels (supplementary)
+# 07_ORA_plots.R — ORA dot-plot panels (supplementary)
 # Environment: go-enrich. Recomputes nothing; reads ORA_tidy.tsv.
 # =========================================================
 # Same layout and same curation rules as 07_figure7_final.R, applied to
@@ -249,6 +249,12 @@ print(as.data.frame(chk))
 # =========================================================
 # This is the question that decides whether these panels belong in the paper.
 
+
+GSEA_IN <- "/home/pdewari/eggnog/results/enrichment/gsea_across_stages_20260923/GSEA_tidy.tsv"
+
+gsea <- read_tsv(GSEA_IN, show_col_types = FALSE)
+nrow(gsea); count(gsea, stage)
+
 if (file.exists(GSEA_IN)) {
 
   gsea <- read_tsv(GSEA_IN, show_col_types = FALSE)
@@ -287,3 +293,17 @@ if (file.exists(GSEA_IN)) {
 
 writeLines(capture.output(sessionInfo()), file.path(FIG_DIR, "sessionInfo.txt"))
 cat("\nOutputs:", FIG_DIR, "\n")
+
+############
+EMAP <- "/home/pdewari/eggnog/results/full_proteome_20260820_124651/full_proteome.emapper.annotations"
+
+hdr  <- readLines(EMAP, n = 200)
+skip <- grep("^#query", hdr)[1] - 1
+egg  <- read_tsv(EMAP, skip = skip, comment = "##", show_col_types = FALSE) %>%
+  rename(query = 1) %>%
+  mutate(gene_id = sub("\\.\\d+$", "", sub("^transcript:", "", query)))
+
+sum(c("G6948","G8086","G19413") %in% egg$gene_id)   # expect 3
+
+egg %>% filter(gene_id %in% c("G6948","G8086","G19413")) %>%
+  select(gene_id, Preferred_name, PFAMs, Description) %>% as.data.frame()

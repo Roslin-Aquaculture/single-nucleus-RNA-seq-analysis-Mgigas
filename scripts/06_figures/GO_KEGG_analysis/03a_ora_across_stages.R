@@ -54,6 +54,18 @@ dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 
 safe_name <- function(x) gsub("[^A-Za-z0-9_.-]", "_", x)
 
+#### load ref files
+REF_DIR <- "/home/pdewari/eggnog/results/full_proteome_20260820_124651/reference_tables_v2/"
+
+t2g_BP            <- readRDS(file.path(REF_DIR, "t2g_BP.rds"))
+t2g_MF            <- readRDS(file.path(REF_DIR, "t2g_MF.rds"))
+t2g_CC            <- readRDS(file.path(REF_DIR, "t2g_CC.rds"))
+term2name_go      <- readRDS(file.path(REF_DIR, "term2name_go.rds"))
+kegg_term2gene    <- readRDS(file.path(REF_DIR, "kegg_term2gene.rds"))
+kegg_names        <- readRDS(file.path(REF_DIR, "kegg_names.rds"))
+background_global <- readRDS(file.path(REF_DIR, "background_global.rds"))
+###################
+
 ontologies <- list(
   GO_BP = list(t2g = t2g_BP,         t2n = term2name_go),
   GO_MF = list(t2g = t2g_MF,         t2n = term2name_go),

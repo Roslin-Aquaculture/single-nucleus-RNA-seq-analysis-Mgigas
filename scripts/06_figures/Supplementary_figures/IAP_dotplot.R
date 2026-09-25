@@ -115,7 +115,7 @@ print(data.frame(feature = genes_iap, label = trimmed_names))
 # =========================================================
 # PLOT
 # =========================================================
-igS_iap <- DotPlot(seu, features = genes_iap) +
+figS_iap <- DotPlot(seu, features = genes_iap) +
   coord_flip() +
   scale_x_discrete(labels = trimmed_names) +
   scale_color_gradientn(

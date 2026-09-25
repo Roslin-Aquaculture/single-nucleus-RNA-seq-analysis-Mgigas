@@ -107,7 +107,7 @@ if (anyNA(genes_iap))
   cat("NOT FOUND:", paste(gene_list_iap[is.na(genes_iap)], collapse = ", "), "\n")
 
 genes_iap     <- unname(genes_iap[!is.na(genes_iap)])
-trimmed_names <- sub(" *:.*", "", genes_iap)
+trimmed_names <- sub("^(\\S+)\\s+(.*)$", "\\1 (\\2)", sub(" *:.*", "", genes_iap))
 
 stopifnot(!any(duplicated(genes_iap)))
 print(data.frame(feature = genes_iap, label = trimmed_names))
@@ -115,26 +115,33 @@ print(data.frame(feature = genes_iap, label = trimmed_names))
 # =========================================================
 # PLOT
 # =========================================================
-figS_iap <- DotPlot(seu, features = genes_iap) +
+igS_iap <- DotPlot(seu, features = genes_iap) +
   coord_flip() +
   scale_x_discrete(labels = trimmed_names) +
   scale_color_gradientn(
     colours = c("#2166AC", "#67A9CF", "#D1E5F0", "#FDDBC7", "#EF8A62", "#B2182B"),
     name = "Average\nexpression") +
+  guides(colour = guide_colourbar(frame.colour = NA, ticks = FALSE)) +
   theme_minimal(base_size = 12, base_family = FONT) +
   theme(
-    text             = element_text(colour = "black", family = FONT),
-    axis.text.x      = element_text(angle = 45, hjust = 1, size = 11, colour = "black"),
-    axis.text.y      = element_text(size = 11, colour = "black"),
-    axis.title       = element_blank(),
-    legend.text      = element_text(size = 10, colour = "black"),
-    legend.title     = element_text(size = 11, colour = "black"),
-    panel.grid.major = element_line(colour = "grey92"),
-    panel.grid.minor = element_blank(),
-    legend.position  = "right")
+    text              = element_text(colour = "black", family = FONT),
+    axis.line         = element_line(colour = "black", linewidth = 0.3),
+    axis.ticks        = element_line(colour = "black", linewidth = 0.3),
+    axis.ticks.length = unit(2, "pt"),
+    axis.text.x       = element_text(angle = 45, hjust = 1, size = 11, colour = "black"),
+    scale_y_discrete(expand = expansion(add = 0.1)),
+    axis.text.y       = element_text(size = 11, colour = "black"),
+    axis.title        = element_blank(),
+    legend.text       = element_text(size = 10, colour = "black"),
+    legend.title      = element_text(size = 10, colour = "black"),
+    legend.key.height = unit(12, "pt"),
+    legend.key.width  = unit(8, "pt"),
+    panel.grid.major  = element_line(colour = "grey94", linewidth = 0.25),
+    panel.grid.minor  = element_blank(),
+    legend.position   = "right")
 
-W <- 3.5 + 0.34 * length(cluster_order)
-H <- 2.0 + 0.34 * length(genes_iap)
+W <- 3.2 + 0.22 * length(cluster_order)   
+H <- 1.8 + 0.28 * length(genes_iap)       
 
 ggsave(file.path(OUT, "FigS_IAP_paralogues.svg"), figS_iap,
        width = W, height = H, device = svglite::svglite, limitsize = FALSE)

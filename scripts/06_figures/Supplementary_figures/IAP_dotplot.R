@@ -129,7 +129,6 @@ igS_iap <- DotPlot(seu, features = genes_iap) +
     axis.ticks        = element_line(colour = "black", linewidth = 0.3),
     axis.ticks.length = unit(2, "pt"),
     axis.text.x       = element_text(angle = 45, hjust = 1, size = 11, colour = "black"),
-    scale_y_discrete(expand = expansion(add = 0.1)),
     axis.text.y       = element_text(size = 11, colour = "black"),
     axis.title        = element_blank(),
     legend.text       = element_text(size = 10, colour = "black"),
@@ -140,8 +139,8 @@ igS_iap <- DotPlot(seu, features = genes_iap) +
     panel.grid.minor  = element_blank(),
     legend.position   = "right")
 
-W <- 3.2 + 0.22 * length(cluster_order)   
-H <- 1.8 + 0.28 * length(genes_iap)       
+W <- 3.5 + 0.34 * length(cluster_order)   
+H <- 2 + 0.34 * length(genes_iap)       
 
 ggsave(file.path(OUT, "FigS_IAP_paralogues.svg"), figS_iap,
        width = W, height = H, device = svglite::svglite, limitsize = FALSE)

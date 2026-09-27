@@ -1,22 +1,91 @@
 # =========================================================
-# 07_figure7_final.R — Figure 7A-C and supplementary tables
+# updated: 27 Sept 2026
+# 07_figure7_final.R - Figure 7A-C and supplementary tables
 # Environment: go-enrich. Recomputes nothing; reads GSEA_tidy.tsv.
 # =========================================================
+# ASCII only throughout. A non-ASCII character in a comment has previously
+# lost its encoding on paste and been parsed as a unary minus.
+#
+# CHANGES IN THIS VERSION
+#   1. Supplementary table: "Panel" replaced by Analysis / Direction /
+#      Figure_panel. The file holds every significant term, including
+#      those removed by the collapse and breadth rules, so labelling all
+#      of them "Panel A" was wrong. Figure_panel fills only where
+#      Displayed is TRUE.
+#   2. Comparisons that were never run are shaded, so a structural
+#      absence is distinguishable from a tested null. Derived from the
+#      DE output rather than hard-coded.
+#   3. Export follows the manuscript figure standard: svglite plus a
+#      style-inlining pass for Inkscape, cairo_pdf alongside, mm sizing
+#      at final printed size, 9 pt Arial set explicitly on every text
+#      element, all text black.
+# =========================================================
 library(readr); library(dplyr); library(tidyr); library(ggplot2)
+library(svglite); library(systemfonts); library(xml2)
 
 ## ---- paths ----
 ENR     <- "/home/pdewari/eggnog/results/enrichment"
-GSEA_IN <- file.path(ENR, "gsea_across_stages", "GSEA_tidy.tsv")
+GSEA_IN <- file.path(ENR, "gsea_across_stages_20260923", "GSEA_tidy.tsv")
 EMAP    <- "/home/pdewari/eggnog/results/full_proteome_20260820_124651/full_proteome.emapper.annotations"
-FIG_DIR <- file.path(ENR, "figures", "figure7_final")
+DE_DIR  <- "/home/pdewari/Documents/parse_2025/seurat_2025/de_full_ranked_minpct01_20260923"
+FIG_DIR <- file.path(ENR, "figures_20260923_test", "figure7_final_20260923_test")
 
 ## ---- parameters (the only things to change) ----
-PADJ         <- 0.05
-OVERLAP_CUT  <- 0.8      # overlap coefficient: intersection / smaller set
-MIN_CLUSTERS <- 2
-STAGES       <- c("6hpi", "24hpi", "72hpi", "96hpi")
+PADJ          <- 0.05
+OVERLAP_CUT   <- 0.8      # overlap coefficient: intersection / smaller set
+MIN_CLUSTERS  <- 2
+STAGES        <- c("6hpi", "24hpi", "72hpi", "96hpi")
+MARK_UNTESTED <- TRUE
+
+FONT      <- "Arial"      # Liberation Sans substitutes on Linux
+BASE_SIZE <- 9
 
 dir.create(FIG_DIR, recursive = TRUE, showWarnings = FALSE)
+
+# =========================================================
+# FONT
+# =========================================================
+fm <- systemfonts::match_fonts(FONT)
+cat("font requested:", FONT, "-> resolved:", basename(fm$path), "\n")
+
+# =========================================================
+# SVG STYLE INLINING
+# =========================================================
+# svglite puts shared stroke and fill declarations in a CSS block inside
+# <defs>. Inkscape drops that stylesheet when a group is ungrouped, and
+# axis lines, ticks and panel borders disappear. Copying the properties
+# onto every drawing element makes the file independent of the stylesheet.
+inline_svg_styles <- function(file) {
+  x  <- xml2::read_xml(file); ns <- xml2::xml_ns(x)
+  els <- xml2::xml_find_all(
+    x, "//d1:line|//d1:polyline|//d1:polygon|//d1:path|//d1:rect|//d1:circle", ns)
+  n <- 0
+  for (e in els) {
+    s <- xml2::xml_attr(e, "style"); if (is.na(s)) s <- ""
+    changed <- FALSE
+    if (!grepl("stroke\\s*:", s)) {
+      s <- paste0(trimws(s), if (nzchar(trimws(s))) " " else "", "stroke: #000000;")
+      changed <- TRUE
+    }
+    if (!grepl("fill\\s*:", s)) {
+      s <- paste0(trimws(s), " fill: none;"); changed <- TRUE
+    }
+    if (changed) { xml2::xml_set_attr(e, "style", s); n <- n + 1 }
+  }
+  xml2::write_xml(x, file)
+  cat("     patched", n, "of", length(els), "elements\n")
+}
+
+# cairo_pdf keeps text as text and carries physical units unambiguously.
+# The default pdf() device writes per-glyph positions and splits letters
+# apart in Inkscape.
+save_both <- function(plot, stem, width_mm, height_mm) {
+  ggsave(paste0(stem, ".svg"), plot, width = width_mm, height = height_mm,
+         units = "mm", device = svglite::svglite, limitsize = FALSE)
+  inline_svg_styles(paste0(stem, ".svg"))
+  ggsave(paste0(stem, ".pdf"), plot, width = width_mm, height = height_mm,
+         units = "mm", device = cairo_pdf, limitsize = FALSE)
+}
 
 # =========================================================
 # PROVENANCE
@@ -104,14 +173,47 @@ curate <- function(onto, dir_keep) {
   list(display = filter(all_terms, Displayed), all = all_terms)
 }
 
+# Per-panel printed size in mm, set here rather than derived from the number
+# of categories, so a panel imports into the A4 layout at the size it will
+# occupy on the page.
 panels <- list(
   A = list(onto = "GO_BP", dir = "up_in_control",
-           title = "GO biological process - lower in infected nuclei"),
+           title = "GO biological process - lower in infected nuclei",
+           w_mm = 180, h_mm = 165),
   B = list(onto = "KEGG",  dir = "up_in_control",
-           title = "KEGG - lower in infected nuclei"),
+           title = "KEGG - lower in infected nuclei",
+           w_mm = 180, h_mm = 85),
   C = list(onto = "GO_BP", dir = "up_in_target",
-           title = "GO biological process - higher in infected nuclei")
+           title = "GO biological process - higher in infected nuclei",
+           w_mm = 140, h_mm = 85)
 )
+
+# =========================================================
+# COMPARISONS THAT WERE NEVER RUN
+# =========================================================
+# A cluster-stage with no DE output was never tested. Mantle cell type 2
+# has 19 nuclei at 96 hpi, too few for differential expression testing.
+# Without shading, that cell is indistinguishable in the figure from a
+# comparison that was tested and returned nothing.
+NOT_TESTED <- data.frame(cluster = character(), stage = character(),
+                         stringsAsFactors = FALSE)
+
+if (MARK_UNTESTED) {
+  if (dir.exists(file.path(DE_DIR, "full"))) {
+    tested <- tibble(f = sub("_full\\.tsv$", "",
+                             list.files(file.path(DE_DIR, "full"),
+                                        pattern = "_full\\.tsv$"))) %>%
+      separate(f, into = c("cluster", "stage"), sep = "_control_vs_")
+    NOT_TESTED <- expand_grid(cluster = unique(gsea$cluster), stage = STAGES) %>%
+      anti_join(tested, by = c("cluster", "stage")) %>%
+      mutate(cluster = gsub("_", " ", cluster)) %>%
+      as.data.frame()
+    cat("\nuntested cluster-stage comparisons:", nrow(NOT_TESTED), "\n")
+    if (nrow(NOT_TESTED)) print(NOT_TESTED)
+  } else {
+    warning("DE_DIR/full not found; untested comparisons will not be shaded")
+  }
+}
 
 # =========================================================
 # PLOT
@@ -129,6 +231,14 @@ make_plot <- function(d, title, dir_keep) {
     cluster     = factor(gsub("_", " ", cluster)),
     Description = factor(Description, levels = ord))
   
+  # untested comparisons, shaded across the full term axis of that facet
+  nt <- NOT_TESTED %>%
+    filter(cluster %in% levels(d$cluster), stage %in% STAGES) %>%
+    tidyr::crossing(Description = levels(d$Description)) %>%
+    mutate(stage       = factor(stage,       levels = STAGES),
+           cluster     = factor(cluster,     levels = levels(d$cluster)),
+           Description = factor(Description, levels = levels(d$Description)))
+  
   # each panel is single-direction by construction, so a sequential scale is
   # correct; a diverging one would advertise a range that cannot occur
   sc <- if (dir_keep == "up_in_control") {
@@ -139,32 +249,68 @@ make_plot <- function(d, title, dir_keep) {
                           name = "NES\n(higher in\ninfected)")
   }
   
-  ggplot(d, aes(cluster, Description, colour = NES, size = -log10(p.adjust))) +
+  p <- ggplot(d, aes(cluster, Description, colour = NES, size = -log10(p.adjust)))
+  
+  if (nrow(nt)) {
+    p <- p + geom_tile(data = nt, aes(x = cluster, y = Description),
+                       fill = "grey88", colour = NA, inherit.aes = FALSE)
+  }
+  
+  p +
     geom_point() +
-    facet_wrap(~ stage, nrow = 1, drop = FALSE) +
+    facet_wrap(~ stage, nrow = 2, drop = FALSE) +
     scale_x_discrete(drop = FALSE) +
     sc +
     scale_size_continuous(range = c(1.5, 5), name = "-log10 FDR") +
+    guides(colour = guide_colourbar(frame.colour = NA, ticks = FALSE)) +
     labs(title = title, x = NULL, y = NULL) +
-    theme_bw(base_size = 9) +
-    theme(axis.text.x      = element_text(angle = 45, hjust = 1),
-          strip.background = element_rect(fill = "grey95", colour = NA),
-          panel.spacing.x  = unit(0.6, "lines"),
-          panel.grid.minor = element_blank(),
-          legend.position  = "right")
+    theme_bw(base_size = BASE_SIZE, base_family = FONT) +
+    theme(
+      # every text element set explicitly; ggplot defaults several to grey30
+      text              = element_text(size = BASE_SIZE, colour = "black", family = FONT),
+      plot.title        = element_text(size = BASE_SIZE, colour = "black",
+                                       family = FONT, face = "plain"),
+      axis.text.x       = element_text(angle = 45, hjust = 1,
+                                       size = BASE_SIZE, colour = "black"),
+      axis.text.y       = element_text(size = BASE_SIZE, colour = "black"),
+      strip.text        = element_text(size = BASE_SIZE, colour = "black"),
+      legend.text       = element_text(size = BASE_SIZE, colour = "black"),
+      legend.title      = element_text(size = BASE_SIZE, colour = "black"),
+      legend.key.height = unit(12, "pt"),
+      legend.key.width  = unit(7,  "pt"),
+      strip.background  = element_rect(fill = "grey95", colour = NA),
+      panel.border      = element_rect(colour = "black", linewidth = 0.3, fill = NA),
+      panel.grid.major  = element_line(colour = "grey94", linewidth = 0.25),
+      panel.grid.minor  = element_blank(),
+      axis.ticks        = element_line(colour = "black", linewidth = 0.3),
+      axis.ticks.length = unit(1.5, "pt"),
+      panel.spacing.x   = unit(0.6, "lines"),
+      legend.position   = "right")
 }
 
-as_table <- function(d, p) {
-  d %>% arrange(desc(N_clusters), p.adjust, cluster, stage) %>%
+# =========================================================
+# SUPPLEMENTARY TABLE
+# =========================================================
+# Analysis and Direction describe the slice, so the file stands alone
+# without the figure beside it. Figure_panel is filled only for terms
+# actually drawn: the file also carries the terms the collapse and
+# breadth rules removed, and those appear in no panel.
+as_table <- function(d, p, cfg) {
+  d %>% arrange(desc(Displayed), desc(N_clusters), ID, p.adjust) %>%
     rowwise() %>%
     mutate(Genes = name_of(strsplit(core_enrichment, "/")[[1]])) %>%
     ungroup() %>%
-    transmute(Panel = p, Cluster = gsub("_", " ", cluster), Stage = stage,
-              Ontology = ontology, Term_ID = ID, Term = Description,
-              N_clusters, Kept_after_collapse, Displayed,
-              Set_size = setSize, NES = round(NES, 3),
-              FDR = signif(p.adjust, 3),
-              Leading_edge_genes = Genes, Leading_edge_ids = core_enrichment)
+    transmute(
+      Analysis     = cfg$title,
+      Direction    = cfg$dir,
+      Figure_panel = ifelse(Displayed, paste0("Fig. 7", p), NA_character_),
+      Cluster      = gsub("_", " ", cluster),
+      Stage        = stage,
+      Ontology     = ontology, Term_ID = ID, Term = Description,
+      N_clusters, Kept_after_collapse, Displayed,
+      Set_size = setSize, NES = round(NES, 3),
+      FDR = signif(p.adjust, 3),
+      Leading_edge_genes = Genes, Leading_edge_ids = core_enrichment)
 }
 
 supp_all <- list()
@@ -173,29 +319,29 @@ for (p in names(panels)) {
   
   cfg <- panels[[p]]
   cur <- curate(cfg$onto, cfg$dir)
-  supp_all[[p]] <- as_table(cur$all, p)
+  supp_all[[p]] <- as_table(cur$all, p, cfg)
   
   d <- cur$display
   if (!nrow(d)) { cat("panel", p, "empty\n"); next }
   
-  write_tsv(as_table(d, p), file.path(FIG_DIR, sprintf("Figure7%s_plotted_terms.tsv", p)))
+  write_tsv(as_table(d, p, cfg),
+            file.path(FIG_DIR, sprintf("Figure7%s_plotted_terms.tsv", p)), na = "")
   
   n_cl <- n_distinct(d$cluster); n_tm <- n_distinct(d$ID)
   
-  ggsave(file.path(FIG_DIR, sprintf("Figure7%s.pdf", p)),
-         make_plot(d, cfg$title, cfg$dir),
-         width  = 3.0 + 4 * (0.30 * n_cl),
-         height = max(4.0, 1.8 + 0.22 * n_tm),
-         limitsize = FALSE)
+  cat(sprintf("  -> Figure7%s : %d terms x %d clusters (%g x %g mm)\n",
+              p, n_tm, n_cl, cfg$w_mm, cfg$h_mm))
   
-  cat(sprintf("  -> Figure7%s.pdf : %d terms x %d clusters\n", p, n_tm, n_cl))
+  save_both(make_plot(d, cfg$title, cfg$dir),
+            file.path(FIG_DIR, sprintf("Figure7%s", p)),
+            width_mm = cfg$w_mm, height_mm = cfg$h_mm)
 }
 
 write_tsv(bind_rows(supp_all),
-          file.path(FIG_DIR, "AdditionalFile_Figure7_all_terms.tsv"))
+          file.path(FIG_DIR, "AdditionalFile_Figure7_all_terms.tsv"), na = "")
 
 # =========================================================
-# VERIFY — every plotted row must trace to an unmodified source row
+# VERIFY - every plotted row must trace to an unmodified source row
 # =========================================================
 chk <- lapply(names(panels), function(p) {
   f <- file.path(FIG_DIR, sprintf("Figure7%s_plotted_terms.tsv", p))
@@ -215,7 +361,6 @@ print(as.data.frame(chk))
 
 writeLines(capture.output(sessionInfo()), file.path(FIG_DIR, "sessionInfo.txt"))
 cat("\nOutputs:", FIG_DIR, "\n")
-
 
 # =========================================================
 # PANEL SUMMARY
@@ -237,3 +382,38 @@ for (p in c("A", "B", "C")) {
                 .groups  = "drop") %>%
       arrange(desc(n_cl), FDR)), right = FALSE)
 }
+
+
+###################
+f <- file.path(FIG_DIR, "AdditionalFile_Figure7_all_terms.tsv")
+a <- read_tsv(f, show_col_types = FALSE)
+
+cat("rows:", nrow(a), "(expect 489)\n\n")
+
+print(a %>% group_by(Analysis, Direction) %>%
+        summarise(rows = n(), terms = n_distinct(Term_ID),
+                  kept = n_distinct(Term_ID[Kept_after_collapse]),
+                  shown = n_distinct(Term_ID[Displayed]), .groups = "drop"))
+# expect  380 / 198 / 50 / 15   |   23 / 8 / 6 / 2   |   86 / 45 / 8 / 2
+
+stopifnot(
+  # Displayed can never be TRUE where the collapse removed the term
+  sum(a$Displayed & !a$Kept_after_collapse) == 0,
+  # Figure_panel filled on exactly the displayed rows
+  all(!is.na(a$Figure_panel) == a$Displayed),
+  # breadth rule held
+  all(a$N_clusters[a$Displayed] >= 2),
+  # N_clusters agrees with the rows actually present
+  a %>% group_by(Analysis, Term_ID) %>%
+    summarise(ok = n_distinct(Cluster) == first(N_clusters), .groups = "drop") %>%
+    pull(ok) %>% all(),
+  # one row per term per comparison
+  !any(duplicated(a[, c("Analysis", "Cluster", "Stage", "Term_ID")])),
+  # nothing above the significance cut leaked in
+  all(a$FDR < 0.05),
+  # sign convention: up_in_control must be negative NES, up_in_target positive
+  all(sign(a$NES) == ifelse(a$Direction == "up_in_control", -1, 1)),
+  # leading edge cannot exceed the gene set
+  all(lengths(strsplit(a$Leading_edge_ids, "/")) <= a$Set_size)
+)
+cat("\nall checks passed\n")

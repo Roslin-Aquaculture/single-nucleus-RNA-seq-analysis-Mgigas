@@ -1,0 +1,16 @@
+run,subcluster,n_nuclei,max_pct_one_animal
+Uncorrected,U0,419,94
+Uncorrected,U1,360,93.6
+Uncorrected,U2,344,93
+Uncorrected,U3,336,95.5
+Uncorrected,U4,320,98.1
+Uncorrected,U5,318,19.5
+Uncorrected,U6,295,90.8
+Uncorrected,U7,200,98.5
+Uncorrected,U8,17,47.1
+Sample-corrected (Harmony),H0,1148,17.5
+Sample-corrected (Harmony),H1,389,18
+Sample-corrected (Harmony),H2,375,26.1
+Sample-corrected (Harmony),H3,352,19.3
+Sample-corrected (Harmony),H4,302,20.2
+Sample-corrected (Harmony),H5,43,27.9

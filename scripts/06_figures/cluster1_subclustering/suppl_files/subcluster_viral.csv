@@ -1,0 +1,69 @@
+run,subcluster,condition,n_nuclei,viral_umi_total,n_pos1,n_pos2
+Uncorrected,U0,control,14,0,0,0
+Uncorrected,U0,6hpi,398,0,0,0
+Uncorrected,U0,24hpi,1,0,0,0
+Uncorrected,U0,72hpi,6,0,0,0
+Uncorrected,U1,control,5,0,0,0
+Uncorrected,U1,6hpi,344,0,0,0
+Uncorrected,U1,72hpi,7,0,0,0
+Uncorrected,U1,96hpi,4,0,0,0
+Uncorrected,U2,control,321,0,0,0
+Uncorrected,U2,6hpi,15,0,0,0
+Uncorrected,U2,24hpi,6,0,0,0
+Uncorrected,U2,72hpi,2,0,0,0
+Uncorrected,U3,control,323,0,0,0
+Uncorrected,U3,6hpi,4,0,0,0
+Uncorrected,U3,24hpi,3,0,0,0
+Uncorrected,U3,72hpi,5,0,0,0
+Uncorrected,U3,96hpi,1,0,0,0
+Uncorrected,U4,control,1,0,0,0
+Uncorrected,U4,24hpi,5,0,0,0
+Uncorrected,U4,72hpi,314,8,4,2
+Uncorrected,U5,control,75,0,0,0
+Uncorrected,U5,6hpi,117,0,0,0
+Uncorrected,U5,24hpi,28,0,0,0
+Uncorrected,U5,72hpi,36,1,1,0
+Uncorrected,U5,96hpi,62,0,0,0
+Uncorrected,U6,control,8,0,0,0
+Uncorrected,U6,6hpi,2,0,0,0
+Uncorrected,U6,24hpi,268,0,0,0
+Uncorrected,U6,72hpi,10,0,0,0
+Uncorrected,U6,96hpi,7,0,0,0
+Uncorrected,U7,6hpi,1,0,0,0
+Uncorrected,U7,24hpi,1,0,0,0
+Uncorrected,U7,72hpi,1,0,0,0
+Uncorrected,U7,96hpi,197,2,1,1
+Uncorrected,U8,control,4,0,0,0
+Uncorrected,U8,6hpi,10,0,0,0
+Uncorrected,U8,24hpi,1,0,0,0
+Uncorrected,U8,72hpi,2,0,0,0
+Sample-corrected (Harmony),H0,control,315,0,0,0
+Sample-corrected (Harmony),H0,6hpi,382,0,0,0
+Sample-corrected (Harmony),H0,24hpi,139,0,0,0
+Sample-corrected (Harmony),H0,72hpi,199,2,1,1
+Sample-corrected (Harmony),H0,96hpi,113,0,0,0
+Sample-corrected (Harmony),H1,control,95,0,0,0
+Sample-corrected (Harmony),H1,6hpi,130,0,0,0
+Sample-corrected (Harmony),H1,24hpi,70,0,0,0
+Sample-corrected (Harmony),H1,72hpi,48,2,2,0
+Sample-corrected (Harmony),H1,96hpi,46,0,0,0
+Sample-corrected (Harmony),H2,control,138,0,0,0
+Sample-corrected (Harmony),H2,6hpi,139,0,0,0
+Sample-corrected (Harmony),H2,24hpi,43,0,0,0
+Sample-corrected (Harmony),H2,72hpi,42,0,0,0
+Sample-corrected (Harmony),H2,96hpi,13,0,0,0
+Sample-corrected (Harmony),H3,control,91,0,0,0
+Sample-corrected (Harmony),H3,6hpi,119,0,0,0
+Sample-corrected (Harmony),H3,24hpi,37,0,0,0
+Sample-corrected (Harmony),H3,72hpi,53,5,2,1
+Sample-corrected (Harmony),H3,96hpi,52,0,0,0
+Sample-corrected (Harmony),H4,control,95,0,0,0
+Sample-corrected (Harmony),H4,6hpi,108,0,0,0
+Sample-corrected (Harmony),H4,24hpi,23,0,0,0
+Sample-corrected (Harmony),H4,72hpi,33,0,0,0
+Sample-corrected (Harmony),H4,96hpi,43,2,1,1
+Sample-corrected (Harmony),H5,control,17,0,0,0
+Sample-corrected (Harmony),H5,6hpi,13,0,0,0
+Sample-corrected (Harmony),H5,24hpi,1,0,0,0
+Sample-corrected (Harmony),H5,72hpi,8,0,0,0
+Sample-corrected (Harmony),H5,96hpi,4,0,0,0

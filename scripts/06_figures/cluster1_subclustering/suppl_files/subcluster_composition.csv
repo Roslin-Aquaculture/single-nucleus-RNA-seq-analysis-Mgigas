@@ -1,0 +1,16 @@
+run,subcluster,n_nuclei,median_nFeature,Uninfected,Homogenate,6-hpiA,6-hpiD,24-hpiJ,72-hpiJ,96-hpiE
+Uncorrected,U0,419,747,0,3.3,94,1,0.2,1.4,0
+Uncorrected,U1,360,580,0.3,1.1,1.9,93.6,0,1.9,1.1
+Uncorrected,U2,344,501,0.3,93,2.3,2,1.7,0.6,0
+Uncorrected,U3,336,552,95.5,0.6,0.3,0.9,0.9,1.5,0.3
+Uncorrected,U4,320,567,0,0.3,0,0,1.6,98.1,0
+Uncorrected,U5,318,1074,4.1,19.5,19.5,17.3,8.8,11.3,19.5
+Uncorrected,U6,295,688,1.4,1.4,0.7,0,90.8,3.4,2.4
+Uncorrected,U7,200,392,0,0,0.5,0,0.5,0.5,98.5
+Uncorrected,U8,17,837,5.9,17.6,47.1,11.8,5.9,11.8,0
+Sample-corrected (Harmony),H0,1148,468,14.1,13.3,17.5,15.8,12.1,17.3,9.8
+Sample-corrected (Harmony),H1,389,783,11.8,12.6,16.7,16.7,18,12.3,11.8
+Sample-corrected (Harmony),H2,375,818,10.7,26.1,24.8,12.3,11.5,11.2,3.5
+Sample-corrected (Harmony),H3,352,1164,10.2,15.6,19.3,14.5,10.5,15.1,14.8
+Sample-corrected (Harmony),H4,302,674,17.2,14.2,15.6,20.2,7.6,10.9,14.2
+Sample-corrected (Harmony),H5,43,596,11.6,27.9,20.9,9.3,2.3,18.6,9.3

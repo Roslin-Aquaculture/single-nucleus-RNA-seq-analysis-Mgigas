@@ -1,0 +1,15 @@
+run,sample,subcluster,n,pct_of_this_animal,subcluster_purity
+Uncorrected,Uninfected,U3,321,94.1,95.5
+Uncorrected,Homogenate,U2,320,78,93
+Uncorrected,6-hpiA,U0,394,81.6,94
+Uncorrected,6-hpiD,U1,337,82.6,93.6
+Uncorrected,24-hpiJ,U6,268,85.6,90.8
+Uncorrected,72-hpiJ,U4,314,82,98.1
+Uncorrected,96-hpiE,U7,197,72.7,98.5
+Sample-corrected (Harmony),Uninfected,H0,162,47.5,17.5
+Sample-corrected (Harmony),Homogenate,H0,153,37.3,17.5
+Sample-corrected (Harmony),6-hpiA,H0,201,41.6,17.5
+Sample-corrected (Harmony),6-hpiD,H0,181,44.4,17.5
+Sample-corrected (Harmony),24-hpiJ,H0,139,44.4,17.5
+Sample-corrected (Harmony),72-hpiJ,H0,199,52,17.5
+Sample-corrected (Harmony),96-hpiE,H0,113,41.7,17.5

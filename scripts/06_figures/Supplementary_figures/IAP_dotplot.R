@@ -208,3 +208,41 @@ cat("written to:", OUT, sprintf("(%.0f x %.0f mm)\n", PANEL_W_MM, PANEL_H_MM))
 
 figS_iap
 
+##############
+# check total BIR genes
+EMAP <- "/home/pdewari/eggnog/results/full_proteome_20260820_124651/full_proteome.emapper.annotations"
+
+hdr  <- readLines(EMAP, n = 200)
+skip <- grep("^#query", hdr)[1] - 1
+egg  <- read_tsv(EMAP, skip = skip, comment = "##", show_col_types = FALSE) %>%
+  rename(query = 1) %>%
+  mutate(gene_id = sub("\\.\\d+$", "", sub("^transcript:", "", query)))
+
+hdr  <- readLines(EMAP, n = 200)
+skip <- grep("^#query", hdr)[1] - 1
+egg  <- read_tsv(EMAP, skip = skip, comment = "##", show_col_types = FALSE) %>%
+  rename(query = 1) %>%
+  mutate(gene_id = sub("\\.\\d+$", "", sub("^transcript:", "", query)))
+
+bir <- egg %>%
+  mutate(has_BIR = vapply(strsplit(PFAMs, ","),
+                          function(p) "BIR" %in% trimws(p), logical(1))) %>%
+  filter(has_BIR)
+
+cat("genes with a BIR domain:", n_distinct(bir$gene_id), "\n")
+cat("genes with symbol birc2:", n_distinct(egg$gene_id[egg$Preferred_name == "birc2"]), "\n")
+cat("union:", length(union(bir$gene_id,
+                           egg$gene_id[egg$Preferred_name == "birc2"])), "\n\n")
+
+bir %>% count(PFAMs, sort = TRUE) %>% print(n = 20)
+
+identity_dir <- "/home/pdewari/Documents/parse_2025/seurat_2025/cluster1_identity_280926"
+
+markers_ctrl <- read_tsv(file.path(identity_dir, "markers_control_only.tsv"),
+                         show_col_types = FALSE)
+c1 <- markers_ctrl %>%
+  filter(cluster == "Cluster_1", p_val_adj < 0.05, avg_log2FC > 0.25) %>%
+  pull(gene_id)
+
+bir %>% filter(gene_id %in% c1) %>%
+  select(gene_id, Preferred_name, PFAMs) %>% as.data.frame()

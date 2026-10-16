@@ -12,6 +12,7 @@
 # =============================================================================
 suppressPackageStartupMessages(library(data.table))
 
+## ---- settings ----------------------------------------------------------------
 setwd("/home/pdewari/genomes/xbMagGiga1.1/")
 
 ## ---- settings ----------------------------------------------------------------
@@ -114,6 +115,18 @@ new_info <- new_genes[, .(new_GeneID = GeneID,
                           new_description = url_decode(attr_val(attr, "description")),
                           new_gene_biotype = attr_val(attr, "gene_biotype"),
                           new_seqid = seqid, new_start = start, new_end = end, new_strand = strand)]
+# RefSeq transcript (XM_/XR_/NM_/NR_) and protein (XP_/NP_) accessions per gene
+gid_of <- function(a) sub(".*GeneID:([0-9]+).*", "\\1", a)
+tx_acc <- unique(ng[type != "exon" & grepl("transcript_id=", attr) & grepl("GeneID:", attr),
+                    .(GeneID = gid_of(attr), acc = attr_val(attr, "transcript_id"))])
+pr_acc <- unique(ng[type == "CDS" & grepl("protein_id=", attr) & grepl("GeneID:", attr),
+                    .(GeneID = gid_of(attr), acc = attr_val(attr, "protein_id"))])
+tx_acc <- tx_acc[!is.na(acc), .(acc = paste(sort(acc), collapse = ";")), by = GeneID]
+pr_acc <- pr_acc[!is.na(acc), .(acc = paste(sort(acc), collapse = ";")), by = GeneID]
+new_info[, `:=`(new_refseq_transcripts = tx_acc$acc[match(new_GeneID, tx_acc$GeneID)],
+                new_refseq_proteins    = pr_acc$acc[match(new_GeneID, pr_acc$GeneID)])]
+message(nrow(tx_acc), " genes with RefSeq transcript accessions; ", nrow(pr_acc), " with protein accessions")
+
 ex_new <- ng[type == "exon" & grepl("GeneID:", attr),
              .(gene_id = sub(".*GeneID:([0-9]+).*", "\\1", attr), seqid, start, end, strand)]
 ex_new <- rbind(ex_new, new_genes[!GeneID %in% ex_new$gene_id,
@@ -235,6 +248,8 @@ cols <- c(
   new_GeneID = "Assigned current NCBI GeneID (blank unless high or medium confidence)",
   new_symbol = "Current gene symbol", new_description = "Current gene description",
   new_gene_biotype = "Current gene biotype",
+  new_refseq_transcripts = "NCBI RefSeq transcript accessions of the current gene (XM_/XR_ = model, NM_/NR_ = curated), ';'-separated",
+  new_refseq_proteins = "NCBI RefSeq protein accessions of the current gene (XP_ = model, NP_ = curated), ';'-separated",
   new_seqid = "RefSeq sequence accession (new assembly)", new_start = "Gene start (new assembly)",
   new_end = "Gene end (new assembly)", new_strand = "Strand (new assembly)",
   new_assembly = "Assembly and annotation release")
